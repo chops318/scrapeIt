@@ -1,0 +1,12 @@
+{
+  "name"         : "scoobs-scrape",
+  "version"      : "0.0.1",
+  "description"  : "Scrapeit.",
+  "main"         : "server.js",
+  "author"       : "sspohC",
+  "dependencies" : {
+    "express"    : "latest",
+    "request"    : "latest",
+    "cheerio"    : "latest"
+  }
+}
