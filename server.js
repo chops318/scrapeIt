@@ -2,34 +2,35 @@ var express = require('express');
 var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
+var async = require('async')
 var app     = express();
-for (var i = 233; i < 236; i++) {
-  url = 'http://sonlite.dnr.state.la.us/sundown/cart_prod/cart_con_wellinfo2?p_wsn=' + i;
 
-    request(url, function(error, response, html) {
-      if (!error) {
-        var $ = cheerio.load(html);
-        //  console.log($)
-        var json = {};
-        var arrayWells = [];
-        //console.log(arrayWells)
-        json.serialNum = $('table td').eq(2).text();
+    var wellAray = [];
 
-        json.wellNum = $('table td').eq(0).text();
 
-        json.wellName = $('table td').eq(1).text();
+var q = async.queue(function(task, done) {
+  request(task.url, function(err, res, html) {
+    if (err) return done(err);
+    var $ = cheerio.load(html);
+    var json = {};
+    json.serialNum = $('table td').eq(2).text();
+    json.wellNum = $('table td').eq(0).text();
+    json.wellName = $('table td').eq(1).text();
+    json.orgId = $('table td').eq(3).text();
+    wellAray.push(json);
+    console.log(wellAray)
+    done();
 
-        json.orgId = $('table td').eq(3).text();
+    fs.writeFile('output.json', JSON.stringify(wellAray, null, 2), function(err) {
 
-        arrayWells.push(json)
-        console.log(arrayWells)
-  }})};
+    })
+  })
+}, 5)
 
-  // fs.writeFile('output.json', JSON.stringify(arrayWells, null, 4), function(err){
-  //
-  // })
+
+for (var i = 233; i < 236; i++){
+  q.push({url: 'http://sonlite.dnr.state.la.us/sundown/cart_prod/cart_con_wellinfo2?p_wsn=' + i})
+}
+
 
 app.listen('9001');
-console.log("the magic happens on port 9001")
-
-exports = module.exports = app;
